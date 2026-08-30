@@ -118,6 +118,7 @@ The only external network calls are two Google Fonts `<link>` tags (Space Grotes
 
 ```
 index.html    — the working prototype (this is the entire application)
+Streamlit_link - https://trendmakers.streamlit.app/
 README.md     — this file
 PROPOSAL.md   — business proposal: problem framing, solution design, target
                 users, business case, phased roadmap, risks & mitigations
