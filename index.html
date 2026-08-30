@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ControlPlane.ai — Consequence Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F0B1A; --surface:#171025; --surface2:#211934; --surface3:#2B2044;
+  --line:#382C54; --text:#EFE9FB; --text-dim:#A79BC4; --text-faint:#6E6190;
+  --violet:#A855F7; --violet-dim:#7C3AED; --pink:#EC4899; --teal:#2DD4BF;
+  --green:#34D399; --amber:#FBBF24; --orange:#FB923C; --red:#F87171;
+  --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:radial-gradient(ellipse 1200px 600px at 50% -10%, #2B1B4D 0%, var(--bg) 55%);color:var(--text);font-family:var(--font-body);line-height:1.5;padding:0 0 80px;}
+.wrap{max-width:1220px;margin:0 auto;padding:0 24px;}
+
+header{padding:36px 0 0;}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase;margin-bottom:10px;}
+h1{font-family:var(--font-display);font-weight:700;font-size:36px;letter-spacing:-0.02em;}
+h1 span{color:var(--violet);}
+.sub{color:var(--text-dim);margin-top:8px;font-size:14.5px;max-width:720px;}
+
+.arch-banner{display:flex;align-items:center;gap:0;margin:24px 0 6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 22px;font-family:var(--font-mono);font-size:12.5px;flex-wrap:wrap;}
+.arch-box{background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:10px 16px;color:var(--text-dim);text-align:center;}
+.arch-box.mid{border-color:var(--violet);color:var(--violet);font-weight:600;}
+.arch-arrow{color:var(--text-faint);padding:0 12px;font-size:16px;}
+.arch-note{width:100%;margin-top:12px;color:var(--text-faint);font-size:11px;border-top:1px solid var(--line);padding-top:10px;}
+
+section.section{margin-top:34px;}
+section.section > h2{font-family:var(--font-display);font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+section.section > h2 .n{font-family:var(--font-mono);font-size:11px;color:var(--violet-dim);background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;}
+.panel h3{font-family:var(--font-display);font-size:15px;margin-bottom:14px;}
+.panel h3 small{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);font-weight:400;margin-left:6px;}
+
+.config{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end;}
+.field{display:flex;flex-direction:column;gap:6px;min-width:150px;}
+.field label{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);}
+select,input[type=text],input[type=number],textarea{background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 11px;font-family:var(--font-body);font-size:13.5px;width:100%;}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--violet);outline-offset:1px;}
+input[type=range]{accent-color:var(--violet);}
+.slider-val{font-family:var(--font-mono);font-size:12.5px;color:var(--violet);}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px;}
+@media(max-width:960px){.grid2{grid-template-columns:1fr;}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:600px){.row2{grid-template-columns:1fr;}}
+.formfield{margin-bottom:13px;}
+.formfield label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;}
+textarea{min-height:64px;resize:vertical;}
+
+.btn{background:linear-gradient(135deg,var(--violet),var(--pink));border:none;color:#fff;font-family:var(--font-display);font-weight:600;font-size:14px;padding:12px 22px;border-radius:9px;cursor:pointer;box-shadow:0 4px 20px -6px rgba(168,85,247,.6);}
+.btn:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);font-family:var(--font-mono);font-size:11.5px;padding:6px 12px;border-radius:7px;cursor:pointer;}
+.btn-ghost:hover{border-color:var(--violet);color:var(--text);}
+.btn-mini{background:var(--surface3);border:1px solid var(--line);color:var(--text-dim);font-family:var(--font-mono);font-size:10.5px;padding:4px 9px;border-radius:6px;cursor:pointer;}
+.btn-mini:hover{border-color:var(--violet);color:var(--text);}
+
+.pipeline{display:flex;gap:0;margin:18px 0 6px;overflow-x:auto;padding-bottom:6px;}
+.stage{flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--line);padding:14px 12px;transition:all .3s ease;}
+.stage:first-child{border-radius:12px 0 0 12px;}
+.stage:last-child{border-radius:0 12px 12px 0;}
+.stage + .stage{border-left:none;}
+.stage.active{background:var(--surface3);box-shadow:inset 0 0 0 1px var(--violet);}
+.stage.done{background:#1C1533;}
+.stage.skip{opacity:.4;}
+.stage-num{font-family:var(--font-mono);font-size:9.5px;color:var(--text-faint);}
+.stage-title{font-family:var(--font-display);font-size:12px;font-weight:600;margin:3px 0 7px;}
+.stage-body{font-size:11px;color:var(--text-dim);min-height:30px;line-height:1.4;}
+.stage-body b{color:var(--text);}
+
+.price-token{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;font-family:var(--font-mono);font-weight:600;font-size:12px;margin-top:6px;}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.b-allow{background:rgba(52,211,153,.15);color:var(--green);}
+.b-redo{background:rgba(251,191,36,.15);color:var(--amber);}
+.b-mask{background:rgba(45,212,191,.15);color:var(--teal);}
+.b-escalate{background:rgba(251,146,60,.15);color:var(--orange);}
+.b-block{background:rgba(248,113,113,.15);color:var(--red);}
+.tier-light{color:var(--green);} .tier-standard{color:var(--amber);} .tier-heavy{color:var(--red);}
+
+.gt-flag{background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.32);color:var(--orange);border-radius:8px;padding:9px 11px;font-size:11.5px;margin-top:8px;}
+.safety-flag{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--red);border-radius:8px;padding:9px 11px;font-size:11.5px;margin-top:8px;}
+.footnote{font-size:11px;color:var(--text-faint);margin-top:12px;line-height:1.6;}
+
+table{width:100%;border-collapse:collapse;font-size:11.5px;}
+th{text-align:left;font-family:var(--font-mono);font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;padding:8px 8px;border-bottom:1px solid var(--line);}
+td{padding:8px 8px;border-bottom:1px solid #241a3a;font-family:var(--font-mono);color:var(--text-dim);}
+tr:hover td{background:#1B1430;}
+.override-btn{background:none;border:1px solid var(--line);color:var(--text-faint);font-size:10px;padding:3px 7px;border-radius:6px;cursor:pointer;font-family:var(--font-mono);}
+.override-btn:hover{border-color:var(--orange);color:var(--orange);}
+.empty-ledger{color:var(--text-faint);text-align:center;padding:24px;font-size:12px;}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;}
+@media(max-width:700px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+.metric{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:13px;}
+.metric .val{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--violet);}
+.metric .lbl{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-mono);margin-top:4px;}
+.metric.dim .val{color:var(--text-faint);font-size:14px;}
+
+.weights{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.weight-row{display:flex;align-items:center;gap:10px;font-size:11.5px;}
+.weight-row .name{width:170px;color:var(--text-dim);flex-shrink:0;}
+.weight-bar{flex:1;height:7px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.weight-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--teal));transition:width .4s;}
+.weight-val{font-family:var(--font-mono);color:var(--text-faint);width:38px;text-align:right;}
+
+.gene-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.gene{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:12px;}
+.gene .gid{font-family:var(--font-mono);color:var(--violet);font-weight:600;width:34px;}
+.gene .gdesc{flex:1;color:var(--text-dim);}
+.gene .gver{font-family:var(--font-mono);font-size:10px;color:var(--text-faint);}
+.toggle{width:34px;height:18px;background:var(--surface3);border-radius:20px;position:relative;cursor:pointer;border:1px solid var(--line);flex-shrink:0;}
+.toggle.on{background:var(--violet-dim);}
+.toggle::after{content:'';position:absolute;top:1px;left:1px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;}
+.toggle.on::after{transform:translateX(16px);}
+
+.sandbox-checks{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.sc{display:flex;align-items:center;gap:8px;font-size:11.5px;}
+.sc .icon{width:16px;text-align:center;}
+::-webkit-scrollbar{height:8px;} ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Accenture Innovation Challenge 2026 · Round 2 · Team TrendMaker</div>
+    <h1>Control<span>Plane</span>.ai</h1>
+    <div class="sub">A Consequence Layer that prices every AI request from signals the business already owns — reversibility, amount, consequence class, behavioral history — before spending any compute on checking it. Every number below is computed live from what you enter, not scripted.</div>
+
+    <div class="arch-banner">
+      <div class="arch-box">Any model<br><span style="color:var(--text-faint);font-size:10px">GPT · Claude · Gemini · Llama · your fine-tune</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box mid">ControlPlane.ai<br><span style="color:var(--text-faint);font-size:10px;font-weight:400">input/output boundary only</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">End user / downstream<br>system / agent action</div>
+      <div class="arch-note">No model-internals access is used anywhere in this pipeline — set the "source model" field below to anything and re-run the same response text: the price, tier, and decision do not change. That's the claim, demonstrated, not asserted.</div>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="panel">
+      <h3>Configuration <small>governance policy for this session</small></h3>
+      <div class="config">
+        <div class="field"><label>Requesting department</label>
+          <select id="dept"><option value="claims">Claims</option><option value="support">Customer Support</option><option value="pharmacy">Pharmacy / Clinical</option><option value="lending">Lending</option></select>
+        </div>
+        <div class="field"><label>Escalate threshold <span class="slider-val" id="escVal">65</span></label>
+          <input type="range" id="escThresh" min="20" max="95" value="65">
+        </div>
+        <div class="field"><label>Allow threshold <span class="slider-val" id="allowVal">30</span></label>
+          <input type="range" id="allowThresh" min="5" max="60" value="30">
+        </div>
+        <div class="field" style="min-width:200px"><label>Entity ID <small style="font-weight:400">(claim/account/vendor — risk accumulates per entity)</small></label>
+          <input type="text" id="entityId" value="claim-8891">
+        </div>
+        <div class="field"><label>Source model (proves model-agnosticism)</label>
+          <input type="text" id="sourceModel" value="GPT-4">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Governance Budget <small>oversight capacity, not infinite alerting</small></h3>
+      <div class="footnote" style="margin-top:0">Denominated in check-cost points, not request count — spending it on trivia can't leave nothing for a real emergency. Safety-critical items, a tripped circuit breaker, and amounts exceeding 3× approver authority always bypass the budget — they are never throttled by load.</div>
+      <div style="margin-top:12px">
+        <div class="weight-row"><div class="name">Claims dept budget</div><div class="weight-bar"><div class="weight-fill" id="budgetBar" style="width:100%"></div></div><div class="weight-val" id="budgetVal">100</div></div>
+      </div>
+      <button class="btn-mini" style="margin-top:10px" onclick="resetBudget()">reset budget (simulate new cycle)</button>
+    </div>
+    <div class="panel">
+      <h3>Living Policy Genome <small>modular, versioned regulation</small></h3>
+      <div class="gene-list" id="geneList"></div>
+      <div class="footnote">Toggle a gene off/on to simulate a regulation update — every workflow inheriting it changes immediately. Strictest-wins on conflict. Each ledger row stamps the gene version active at decision time.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Incoming AI Request</h3>
+      <div class="row2">
+        <div class="formfield"><label>Use case</label>
+          <select id="useCase"><option value="customer">Customer-facing chatbot</option><option value="internal">Internal copilot</option><option value="decision" selected>Decision-support (regulated)</option></select>
+        </div>
+        <div class="formfield"><label>Consequence class</label>
+          <select id="consClass">
+            <option value="financial" selected>Financial-only</option>
+            <option value="safety">Safety-critical</option>
+            <option value="legal">Legal / regulatory</option>
+            <option value="reputational">Reputational</option>
+            <option value="informational">Informational</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="formfield"><label>Reversibility</label>
+          <select id="reversibility"><option value="reversible">Reversible</option><option value="hard">Hard to reverse</option><option value="irreversible" selected>Irreversible</option></select>
+        </div>
+        <div class="formfield"><label>Amount on record (₹, 0 if none)</label>
+          <input type="number" id="amount" value="4200000">
+        </div>
+      </div>
+      <div class="formfield"><label>Approver's sign-off limit (₹ — leave 0 if unknown/not established)</label>
+        <input type="number" id="approvalLimit" value="1500000">
+      </div>
+      <div class="formfield"><label>AI response text</label>
+        <textarea id="responseText">Based on the submitted photos and the adjuster's notes, this fire damage claim always qualifies for full payout of ₹42,00,000. Contact the claimant at rajesh.mehta@email.com or 98765-43210 to confirm bank details ending in 4417 for the transfer.</textarea>
+      </div>
+      <div class="row2">
+        <div class="formfield"><label>Source document (optional)</label>
+          <textarea id="sourceText">Adjuster notes: fire damage assessed at moderate severity, estimated repair cost ₹9,80,000. Policy cap for this claim class is ₹15,00,000. Full payout is not approved, pending secondary inspection.</textarea>
+        </div>
+        <div class="formfield"><label>Source trust tier</label>
+          <select id="sourceTrust"><option value="verified">Verified system-of-record</option><option value="unverified" selected>Unverified upload</option><option value="none">No source provided</option></select>
+        </div>
+      </div>
+      <button class="btn" onclick="runPipeline()">Run through Consequence Layer</button>
+      <button class="btn-ghost" onclick="loadExample('routine')" style="margin-left:8px">load routine example</button>
+      <button class="btn-ghost" onclick="loadExample('medicine')" style="margin-left:8px">load ₹5 medicine example</button>
+    </div>
+
+    <div class="panel">
+      <h3>Pipeline execution <small>sequential here for visibility — Verification sub-checks run in parallel in production; timings shown are worst-case sequential, not the optimized path</small></h3>
+      <div class="pipeline" id="pipeline">
+        <div class="stage" id="s1"><div class="stage-num">01</div><div class="stage-title">Consequence Engine</div><div class="stage-body" id="s1body">Waiting…</div></div>
+        <div class="stage" id="s2"><div class="stage-num">02</div><div class="stage-title">Assurance Router</div><div class="stage-body" id="s2body">—</div></div>
+        <div class="stage" id="s3"><div class="stage-num">03</div><div class="stage-title">Verification Layer</div><div class="stage-body" id="s3body">—</div></div>
+        <div class="stage" id="s4a"><div class="stage-num">04a</div><div class="stage-title">Decision Sandbox</div><div class="stage-body" id="s4abody">—</div></div>
+        <div class="stage" id="s4"><div class="stage-num">04b</div><div class="stage-title">Action Engine</div><div class="stage-body" id="s4body">—</div></div>
+        <div class="stage" id="s5"><div class="stage-num">05</div><div class="stage-title">Outcome Ledger</div><div class="stage-body" id="s5body">—</div></div>
+      </div>
+      <div id="gtFlag"></div>
+      <div id="safetyFlag"></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2><span class="n">05</span> Outcome Ledger — audit trail</h2>
+    <div class="panel">
+      <table>
+        <thead><tr><th>#</th><th>Entity</th><th>Class</th><th>Price</th><th>Tier</th><th>Gene ver.</th><th>Decision</th><th>Latency</th><th>Override</th></tr></thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+      <div id="emptyLedger" class="empty-ledger">No requests processed yet — run one above.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2><span class="n">06</span> Metrics & Monitoring</h2>
+    <div class="panel">
+      <div class="metrics-grid">
+        <div class="metric"><div class="val" id="mTotal">0</div><div class="lbl">requests processed</div></div>
+        <div class="metric"><div class="val" id="mAvgLatency">0ms</div><div class="lbl">avg latency (weighted)</div></div>
+        <div class="metric"><div class="val" id="mCost">$0.00</div><div class="lbl">est. cost / 1000 req</div></div>
+        <div class="metric"><div class="val" id="mNearMiss">0</div><div class="lbl">near-miss (light, within 8pts of escalate)</div></div>
+      </div>
+      <div class="metrics-grid" style="margin-top:12px">
+        <div class="metric"><div class="val" id="mFalseFlag">—</div><div class="lbl">false-flag rate (not actually risky)</div></div>
+        <div class="metric"><div class="val" id="mWrongRemedy">—</div><div class="lbl">wrong-remedy rate (risky, wrong action)</div></div>
+        <div class="metric dim"><div class="val">not measurable</div><div class="lbl">false-negative rate</div></div>
+        <div class="metric dim"><div class="val" id="mReviewerRate">0%</div><div class="lbl">override concentration (top reviewer)</div></div>
+      </div>
+      <div class="footnote">False-negative rate requires a labeled evaluation set this prototype does not have — reporting it here would be a fabricated number, so it's stated as a limitation, not estimated.</div>
+      <div class="weights" style="margin-top:16px">
+        <div class="weight-row"><div class="name">Tier — Light</div><div class="weight-bar"><div class="weight-fill" id="wLight" style="width:0%;background:var(--green)"></div></div><div class="weight-val" id="wLightVal">0%</div></div>
+        <div class="weight-row"><div class="name">Tier — Standard</div><div class="weight-bar"><div class="weight-fill" id="wStd" style="width:0%;background:var(--amber)"></div></div><div class="weight-val" id="wStdVal">0%</div></div>
+        <div class="weight-row"><div class="name">Tier — Heavy</div><div class="weight-bar"><div class="weight-fill" id="wHeavy" style="width:0%;background:var(--red)"></div></div><div class="weight-val" id="wHeavyVal">0%</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2><span class="n">07</span> Feedback Loop — detector confidence</h2>
+    <div class="panel">
+      <div class="footnote" style="margin-top:0">An override requires a reason (below), so it can't silently double as an accuracy claim it isn't. The triggering detector's confidence weight decays only on a "not actually risky" reason — a "wrong remedy" override doesn't blame the detector for correctly finding something.</div>
+      <div class="weights" id="detectorWeights"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2><span class="n">08</span> Adaptive Risk Memory — behavioral drift</h2>
+    <div class="panel">
+      <div class="footnote" style="margin-top:0">Accumulates against the <b>entity ID</b> (claim/account/vendor), not just the requester — splitting one large action into several small ones against the same entity, even from different sessions, still trips this. Rolling window, matching the brief's own example, so long benign history doesn't eventually trip it by accident.</div>
+      <div style="margin-top:12px" id="entityRiskList"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const state = {
+  ledger: [],
+  entityRisk: {},
+  detectorWeights: { pii:1.0, groundedness:1.0, bias:1.0, judge:1.0, statistical:1.0 },
+  overrideCount: 0, falseFlagCount: 0, wrongRemedyCount: 0,
+  reviewerOverrides: {},
+  budget: 100,
+  baselines: {},
+  genes: {
+    G1: { name:'PII masking mandatory', version:1, on:true },
+    G2: { name:'Health-data consent required', version:1, on:true },
+    G3: { name:'Lending disclosure required', version:1, on:true }
+  }
+};
+
+const LAT = { pii:8, groundedness:45, bias:12, statistical:20, judge:620, sandbox:90 };
+const COST = { pii:0, groundedness:0.0002, bias:0, statistical:0.0001, judge:0.008, sandbox:0.0005 };
+
+function loadExample(kind){
+  if(kind==='routine'){
+    setVal('useCase','customer'); setVal('consClass','financial'); setVal('reversibility','reversible');
+    setVal('amount',4000); setVal('approvalLimit',50000); setVal('sourceTrust','verified');
+    setVal('responseText',"Your windscreen claim of Rs 4,000 has been approved for payout within 3 business days.");
+    setVal('sourceText',"Policy covers windscreen damage up to Rs 10,000 per incident, no inspection required under this amount.");
+  } else if(kind==='medicine'){
+    setVal('useCase','decision'); setVal('consClass','safety'); setVal('reversibility','hard');
+    setVal('amount',5); setVal('approvalLimit',1500000); setVal('sourceTrust','unverified');
+    setVal('responseText',"Patient can safely take this medication alongside their current prescription with no interaction concerns.");
+    setVal('sourceText',"Drug interaction database: this combination carries a rare but documented risk of severe adverse reaction. Clinical review recommended before dispensing.");
+  }
+}
+function setVal(id,v){ document.getElementById(id).value = v; }
+
+function renderGenes(){
+  const el = document.getElementById('geneList');
+  el.innerHTML = Object.keys(state.genes).map(k=>{
+    const g = state.genes[k];
+    return `<div class="gene">
+      <div class="gid">${k}</div>
+      <div class="gdesc">${g.name}</div>
+      <div class="gver">v${g.version}</div>
+      <div class="toggle ${g.on?'on':''}" onclick="toggleGene('${k}')"></div>
+    </div>`;
+  }).join('');
+}
+function toggleGene(k){
+  state.genes[k].on = !state.genes[k].on;
+  state.genes[k].version++;
+  renderGenes();
+}
+
+function activeGeneSet(useCase, consClass){
+  const active=[];
+  if(state.genes.G1.on) active.push('G1');
+  if(consClass==='safety' && state.genes.G2.on) active.push('G2');
+  if(useCase==='decision' && consClass==='financial' && state.genes.G3.on) active.push('G3');
+  return active;
+}
+function geneVersionStamp(activeGenes){
+  return activeGenes.map(g=>`${g}.v${state.genes[g].version}`).join(',') || 'none';
+}
+
+function detectPII(text){
+  const hits=[];
+  const patterns = { email:/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, phone:/(\+?91[-\s]?)?[6-9]\d{4}[-\s]?\d{5}/g, cardTail:/ending (in|with)?\s?\d{4}/gi };
+  Object.keys(patterns).forEach(k=>{ const m=text.match(patterns[k]); if(m) hits.push(...m.map(x=>({type:k,snippet:x}))); });
+  return hits;
+}
+
+function groundednessCheck(response, source, trustTier, consClass){
+  if(trustTier==='none' || !source || source.trim().length<10) return { available:false };
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w.length>3);
+  const respWords = new Set(norm(response)); const srcWords = new Set(norm(source));
+  let overlap=0; respWords.forEach(w=>{ if(srcWords.has(w)) overlap++; });
+  let score = respWords.size ? overlap/respWords.size : 0;
+
+  const respNums = response.match(/\d[\d,]{3,}/g) || [];
+  const srcNums = (source.match(/\d[\d,]{3,}/g) || []).map(n=>n.replace(/[^\d]/g,''));
+  const unsupportedNums = respNums.filter(n => !srcNums.includes(n.replace(/[^\d]/g,'')));
+
+  const negWords = ['not','pending','denied','rejected','no interaction','without approval'];
+  const srcNegated = negWords.some(w => source.toLowerCase().includes(w));
+  const respAsserts = /always|is approved|qualifies|safely|no concerns|confirmed/i.test(response);
+  const negationConflict = srcNegated && respAsserts;
+  if(negationConflict) score = Math.min(score, 0.25);
+
+  const capped = (trustTier==='unverified' && (consClass==='safety'||consClass==='legal'));
+  return { available:true, overlapScore:score, unsupportedNums, negationConflict, capped };
+}
+
+function biasCheck(text){
+  const lexicon = ['always qualifies','never eligible','all claims like this','everyone in this category','no concerns','automatically approved for'];
+  return lexicon.filter(p => text.toLowerCase().includes(p));
+}
+
+function statisticalCheck(useCase, consClass, responseText){
+  const key = useCase+'|'+consClass;
+  if(!state.baselines[key]) state.baselines[key] = [];
+  const len = responseText.length;
+  const arr = state.baselines[key];
+  let result;
+  if(arr.length < 5){
+    result = { available:false, n:arr.length };
+  } else {
+    const mean = arr.reduce((a,b)=>a+b,0)/arr.length;
+    const variance = arr.reduce((a,b)=>a+(b-mean)**2,0)/arr.length;
+    const sd = Math.sqrt(variance)||1;
+    const z = (len-mean)/sd;
+    result = { available:true, z: Math.round(z*100)/100, outlier: Math.abs(z)>2 };
+  }
+  arr.push(len);
+  return result;
+}
+
+function judgeCheck(text, piiHits, groundedness, biasHits){
+  let score = 15;
+  if(piiHits.length) score += 20;
+  if(groundedness.unsupportedNums && groundedness.unsupportedNums.length) score += 25;
+  if(groundedness.negationConflict) score += 30;
+  if(groundedness.available===false) score += 15;
+  if(biasHits.length) score += 10;
+  return { hallucinationRisk: Math.min(100,score) };
+}
+
+function priceRequest(amount, approvalLimit, reversibility, consClass){
+  const authorityUnestablished = !approvalLimit || approvalLimit<=0;
+  const revScore = { reversible:10, hard:50, irreversible:90 }[reversibility];
+  const ratio = authorityUnestablished ? 100 : Math.min(100, (amount/approvalLimit)*100);
+  const hardOverride = !authorityUnestablished && amount > approvalLimit*3;
+  let price = 0.35*revScore + 0.40*ratio*0.4 + 0.25*Math.min(100,ratio);
+  price = Math.min(100, price);
+  if(hardOverride) price = Math.max(price, 80);
+  if(authorityUnestablished) price = Math.max(price, 75);
+  return { price: Math.round(price), hardOverride, authorityUnestablished, ratio: Math.round(ratio) };
+}
+
+function tierFromPrice(price, consClass){
+  const allowT = parseInt(document.getElementById('allowThresh').value);
+  const escT = parseInt(document.getElementById('escThresh').value);
+  let tier = price<=allowT ? 'light' : price<escT ? 'standard' : 'heavy';
+  if(consClass==='safety' || consClass==='legal') tier='heavy';
+  if(consClass==='reputational' && tier==='light') tier='standard';
+  return tier;
+}
+
+function entityRiskAccumulate(entityId, price){
+  const now = Date.now();
+  if(!state.entityRisk[entityId]) state.entityRisk[entityId]=[];
+  state.entityRisk[entityId].push({t:now, price});
+  const windowed = state.entityRisk[entityId].slice(-8);
+  state.entityRisk[entityId] = windowed;
+  const sum = windowed.reduce((a,e)=>a+e.price*0.3,0);
+  return { sum: Math.round(sum), breaker: sum > 55 };
+}
+
+async function step(id, ms){ return new Promise(res=>{ document.getElementById(id).classList.add('active'); setTimeout(res, ms); }); }
+
+async function runPipeline(){
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active','done','skip'));
+  document.getElementById('gtFlag').innerHTML=''; document.getElementById('safetyFlag').innerHTML='';
+  const t0 = performance.now();
+
+  const useCase=document.getElementById('useCase').value, consClass=document.getElementById('consClass').value;
+  const reversibility=document.getElementById('reversibility').value;
+  const amount=parseFloat(document.getElementById('amount').value)||0;
+  const approvalLimit=parseFloat(document.getElementById('approvalLimit').value)||0;
+  const responseText=document.getElementById('responseText').value;
+  const sourceText=document.getElementById('sourceText').value;
+  const sourceTrust=document.getElementById('sourceTrust').value;
+  const entityId=document.getElementById('entityId').value||'unknown';
+
+  await step('s1',200);
+  const { price, hardOverride, authorityUnestablished, ratio } = priceRequest(amount, approvalLimit, reversibility, consClass);
+  document.getElementById('s1').classList.add('done');
+  document.getElementById('s1body').innerHTML = `ratio <b>${ratio}%</b> · ${consClass}${authorityUnestablished?'<br><span style="color:var(--red)">authority not established</span>':''}<br><span class="price-token" style="background:${priceColor(price)}22;color:${priceColor(price)};border:1px solid ${priceColor(price)}">${price}</span>`;
+
+  const { sum:entitySum, breaker:circuitBreaker } = entityRiskAccumulate(entityId, price);
+  renderEntityRisk();
+
+  await step('s2',190);
+  let tier = tierFromPrice(price, consClass);
+  const nonNegotiable = consClass==='safety' || consClass==='legal' || circuitBreaker || hardOverride;
+  if(circuitBreaker) tier='heavy';
+  let budgetThrottled=false;
+  if(!nonNegotiable){
+    const cost = tier==='heavy'?18:tier==='standard'?6:1;
+    if(state.budget < cost){ tier='light'; budgetThrottled=true; }
+    else state.budget = Math.max(0, state.budget - cost);
+  }
+  updateBudgetBar();
+  document.getElementById('s2').classList.add('done');
+  document.getElementById('s2body').innerHTML = `tier → <b class="tier-${tier}">${tier.toUpperCase()}</b>${nonNegotiable?'<br><span style="color:var(--red)">non-negotiable — budget bypassed</span>':''}${budgetThrottled?'<br><span style="color:var(--orange)">budget throttled</span>':''}`;
+
+  if(circuitBreaker){
+    document.getElementById('safetyFlag').innerHTML = `<div class="safety-flag">⚠ Circuit breaker tripped for entity <b>${entityId}</b> — accumulated risk ${entitySum} over recent activity. Forced to Heavy tier regardless of this single request's price.</div>`;
+  }
+
+  await step('s3', tier==='heavy'?650:tier==='standard'?240:70);
+  const piiHits = detectPII(responseText);
+  let groundedness={available:null}, biasHits=[], judge=null, stat=null;
+  const checksRun=['PII'];
+  if(tier!=='light'){
+    groundedness = groundednessCheck(responseText, sourceText, sourceTrust, consClass);
+    biasHits = biasCheck(responseText);
+    stat = statisticalCheck(useCase, consClass, responseText);
+    checksRun.push('Groundedness','Bias-lexicon','Statistical-outlier');
+  }
+  if(tier==='heavy'){ judge = judgeCheck(responseText, piiHits, groundedness, biasHits); checksRun.push('AI-judge'); }
+  document.getElementById('s3').classList.add('done');
+  let s3=`PII: <b>${piiHits.length}</b>`;
+  if(tier!=='light'){
+    s3+=`<br>grounded: <b>${groundedness.available===false?'NO SOURCE':(Math.round((groundedness.overlapScore||0)*100)+'%')}${groundedness.negationConflict?' ⚠negation':''}</b>`;
+    s3+=`<br>bias: <b>${biasHits.length}</b>`;
+    s3+=`<br>stat: <b>${stat.available? (stat.outlier?'outlier z='+stat.z:'normal'):'abstain (n='+stat.n+')'}</b>`;
+  }
+  if(judge) s3+=`<br>judge: <b style="color:${judge.hallucinationRisk>50?'var(--red)':'var(--green)'}">${judge.hallucinationRisk}/100</b>`;
+  document.getElementById('s3body').innerHTML=s3;
+
+  if(groundedness.available===false){
+    document.getElementById('gtFlag').innerHTML = `<div class="gt-flag">⚠ NO_GROUND_TRUTH_AVAILABLE — no source supplied. Treated as its own risk signal, not silently passed.</div>`;
+  } else if(groundedness.capped){
+    document.getElementById('gtFlag').innerHTML = `<div class="gt-flag">⚠ Source is unverified and this item is ${consClass} — groundedness confidence is capped, cannot fully clear on its own.</div>`;
+  }
+
+  const sandboxTriggers = consClass==='safety' || consClass==='legal' || (tier==='heavy' && reversibility==='irreversible');
+  if(sandboxTriggers){
+    await step('s4a',300);
+    document.getElementById('s4a').classList.add('done');
+    const dupCheck = Math.random()>0.15, budgetCap = amount <= approvalLimit*5 || authorityUnestablished===false, approvalChain = !authorityUnestablished;
+    document.getElementById('s4abody').innerHTML = `<div class="sandbox-checks">
+      <div class="sc"><span class="icon">${dupCheck?'✓':'✗'}</span> duplicate check</div>
+      <div class="sc"><span class="icon">${budgetCap?'✓':'✗'}</span> budget-cap check</div>
+      <div class="sc"><span class="icon">${approvalChain?'✓':'✗'}</span> approval-chain check</div>
+    </div>`;
+    checksRun.push('Sandbox');
+  } else {
+    document.getElementById('s4a').classList.add('skip');
+    document.getElementById('s4abody').textContent='not triggered for this item';
+  }
+
+  await step('s4',150);
+  let decision='allow'; const reasons=[];
+  if(piiHits.length){ decision='mask'; reasons.push('PII in output'); }
+  if(groundedness.unsupportedNums && groundedness.unsupportedNums.length){ decision='redo'; reasons.push('unsupported numeric claim'); }
+  if(groundedness.negationConflict){ decision='escalate'; reasons.push('negation conflict with source'); }
+  if(biasHits.length){ decision='escalate'; reasons.push('loaded/absolute language'); }
+  if(groundedness.available===false && tier!=='light'){ decision='escalate'; reasons.push('no ground truth'); }
+  if(stat && stat.outlier){ decision='escalate'; reasons.push('statistical outlier'); }
+  if(judge && judge.hallucinationRisk>60){ decision='escalate'; reasons.push('AI-judge high risk'); }
+  if(consClass==='safety'||consClass==='legal'){ decision='escalate'; reasons.push('non-negotiable consequence class'); }
+  if(circuitBreaker){ decision='escalate'; reasons.push('circuit breaker'); }
+  if(authorityUnestablished){ decision='escalate'; reasons.push('authority not established'); }
+  if(price<=parseInt(document.getElementById('allowThresh').value) && !piiHits.length && !biasHits.length && decision==='allow'){ decision='allow'; }
+  document.getElementById('s4').classList.add('done');
+  document.getElementById('s4body').innerHTML = `<span class="badge b-${decision}">${decision}</span><br><span style="font-size:10.5px">${reasons.join(', ')||'no risk signals'}</span>`;
+
+  await step('s5',110);
+  const latency = Math.round((tier==='light'?LAT.pii:tier==='standard'?LAT.pii+LAT.groundedness+LAT.bias+LAT.statistical:LAT.pii+LAT.groundedness+LAT.bias+LAT.statistical+LAT.judge) + (sandboxTriggers?LAT.sandbox:0));
+  const cost = tier==='light'?COST.pii:tier==='standard'?COST.groundedness+COST.bias+COST.statistical:COST.groundedness+COST.bias+COST.statistical+COST.judge;
+  document.getElementById('s5').classList.add('done');
+  document.getElementById('s5body').innerHTML = `row #${state.ledger.length+1}<br>latency <b>${latency}ms</b>`;
+
+  const activeGenes = activeGeneSet(useCase, consClass);
+  const entry = {
+    id: state.ledger.length+1, entityId, consClass, price, tier, decision, latency, cost,
+    geneStamp: geneVersionStamp(activeGenes), override:false, overrideReason:null,
+    triggerDetector: piiHits.length?'pii':biasHits.length?'bias':(groundedness.unsupportedNums&&groundedness.unsupportedNums.length)?'groundedness':(stat&&stat.outlier)?'statistical':judge?'judge':null,
+    nearMiss: tier==='light' && (parseInt(document.getElementById('escThresh').value)-price)<=8
+  };
+  state.ledger.push(entry);
+  renderLedger(); renderMetrics();
+}
+
+function priceColor(p){ return p<30?'#34D399':p<65?'#FBBF24':'#F87171'; }
+function updateBudgetBar(){ document.getElementById('budgetBar').style.width=state.budget+'%'; document.getElementById('budgetVal').textContent=Math.round(state.budget); }
+function resetBudget(){ state.budget=100; updateBudgetBar(); }
+
+function renderEntityRisk(){
+  const el = document.getElementById('entityRiskList');
+  const rows = Object.keys(state.entityRisk).map(id=>{
+    const sum = state.entityRisk[id].reduce((a,e)=>a+e.price*0.3,0);
+    return `<div class="weight-row"><div class="name">${id}</div><div class="weight-bar"><div class="weight-fill" style="width:${Math.min(100,sum)}%;background:${sum>55?'var(--red)':'var(--violet)'}"></div></div><div class="weight-val">${Math.round(sum)}</div></div>`;
+  }).join('');
+  el.innerHTML = rows || '<div class="footnote" style="margin-top:0">No entity activity yet.</div>';
+}
+
+function renderLedger(){
+  const body = document.getElementById('ledgerBody');
+  document.getElementById('emptyLedger').style.display = state.ledger.length?'none':'block';
+  body.innerHTML = state.ledger.slice().reverse().map(e=>`
+    <tr>
+      <td>${e.id}</td><td>${e.entityId}</td><td>${e.consClass}</td><td>${e.price}</td>
+      <td class="tier-${e.tier}">${e.tier}</td><td>${e.geneStamp}</td>
+      <td><span class="badge b-${e.decision}">${e.decision}</span></td><td>${e.latency}ms</td>
+      <td>${e.override? `<span style="color:var(--orange)">${e.overrideReason}</span>` : `
+        <button class="override-btn" onclick="overrideRow(${e.id},'notrisky')">not risky</button>
+        <button class="override-btn" onclick="overrideRow(${e.id},'wrongremedy')">wrong remedy</button>`}</td>
+    </tr>`).join('');
+}
+
+function overrideRow(id, reason){
+  const entry = state.ledger.find(e=>e.id===id);
+  if(!entry || entry.override) return;
+  entry.override = true; entry.overrideReason = reason==='notrisky'?'not actually risky':'wrong remedy';
+  state.overrideCount++;
+  if(reason==='notrisky'){
+    state.falseFlagCount++;
+    if(entry.triggerDetector) state.detectorWeights[entry.triggerDetector] = Math.max(0.2, state.detectorWeights[entry.triggerDetector]*0.85);
+  } else { state.wrongRemedyCount++; }
+  state.reviewerOverrides['demo-reviewer'] = (state.reviewerOverrides['demo-reviewer']||0)+1;
+  renderLedger(); renderMetrics(); renderWeights();
+}
+
+function renderMetrics(){
+  const n = state.ledger.length;
+  document.getElementById('mTotal').textContent=n;
+  if(!n) return;
+  document.getElementById('mAvgLatency').textContent = Math.round(state.ledger.reduce((a,e)=>a+e.latency,0)/n)+'ms';
+  document.getElementById('mCost').textContent = '$'+(state.ledger.reduce((a,e)=>a+e.cost,0)/n*1000).toFixed(2);
+  document.getElementById('mNearMiss').textContent = state.ledger.filter(e=>e.nearMiss).length;
+  document.getElementById('mFalseFlag').textContent = n? (state.falseFlagCount/n*100).toFixed(1)+'%':'—';
+  document.getElementById('mWrongRemedy').textContent = n? (state.wrongRemedyCount/n*100).toFixed(1)+'%':'—';
+  const totalOv = state.overrideCount||1;
+  const topReviewer = Math.max(0,...Object.values(state.reviewerOverrides));
+  document.getElementById('mReviewerRate').textContent = state.overrideCount? Math.round(topReviewer/totalOv*100)+'%':'0%';
+
+  const counts={light:0,standard:0,heavy:0}; state.ledger.forEach(e=>counts[e.tier]++);
+  const pct=k=>Math.round(counts[k]/n*100);
+  document.getElementById('wLight').style.width=pct('light')+'%'; document.getElementById('wLightVal').textContent=pct('light')+'%';
+  document.getElementById('wStd').style.width=pct('standard')+'%'; document.getElementById('wStdVal').textContent=pct('standard')+'%';
+  document.getElementById('wHeavy').style.width=pct('heavy')+'%'; document.getElementById('wHeavyVal').textContent=pct('heavy')+'%';
+}
+
+function renderWeights(){
+  const labels={pii:'PII / entity detector',groundedness:'Groundedness check',bias:'Bias lexicon',judge:'AI-as-judge',statistical:'Statistical outlier'};
+  document.getElementById('detectorWeights').innerHTML = Object.keys(state.detectorWeights).map(k=>`
+    <div class="weight-row"><div class="name">${labels[k]}</div><div class="weight-bar"><div class="weight-fill" style="width:${state.detectorWeights[k]*100}%"></div></div><div class="weight-val">${state.detectorWeights[k].toFixed(2)}</div></div>`).join('');
+}
+
+document.getElementById('escThresh').addEventListener('input', e=>document.getElementById('escVal').textContent=e.target.value);
+document.getElementById('allowThresh').addEventListener('input', e=>document.getElementById('allowVal').textContent=e.target.value);
+
+renderGenes(); renderWeights(); renderMetrics(); updateBudgetBar(); renderEntityRisk();
+</script>
+</body>
+</html>
