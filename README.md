@@ -112,7 +112,6 @@ The only external network calls are two Google Fonts `<link>` tags (Space Grotes
 5. Run several requests with the same **Entity ID** to watch **Adaptive Risk Memory** accumulate and eventually trip the circuit breaker.
 6. Use the **"not risky" / "wrong remedy"** buttons on any ledger row to see the **Feedback Loop** detector-confidence weights shift.
 
-**To deploy publicly (GitHub Pages):** in the repository settings, under Pages, set source to "Deploy from branch," branch `main`, folder `/root`. GitHub will publish `index.html` at a public URL within about a minute — no build step required.
 
 ## 7. Repository contents
 
