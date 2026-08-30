@@ -3,10 +3,6 @@
 **Accenture Innovation Challenge 2026 — Round 2 Prototype**
 **Team TrendMaker** — Rushikesh Gundewar, Aaditya Dabhade, Nazmi Syed (Geophysics, IIT Kharagpur)
 **Track:** ControlPlane.ai
-
-**Live demo:** *(add your GitHub Pages link here once enabled — see "Deploying" below)*
-**Demo video:** *(add your video link here)*
-
 ---
 
 ## 1. What this is
